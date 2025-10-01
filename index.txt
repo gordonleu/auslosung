@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Facebook Auslosungs-Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 20px;
+      margin: 0;
+    }
+    h1 {
+      color: #1877f2;
+    }
+    textarea {
+      width: 90%;
+      max-width: 500px;
+      height: 200px;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .controls {
+      margin: 10px;
+    }
+    input[type="number"] {
+      width: 60px;
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    button {
+      background: #1877f2;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    button:hover {
+      background: #145dbf;
+    }
+    #winner {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #28a745;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎉 Facebook Auslosungs-Tool 🎉</h1>
+  <p>Kopiere den ganzen Kommentar-Chat oder füge manuell Namen ein:</p>
+  <textarea id="names" placeholder="Kommentare oder Namen einfügen..."></textarea><br>
+
+  <div class="controls">
+    Anzahl Gewinner: 
+    <input type="number" id="winnerCount" value="1" min="1" max="50">
+    <button onclick="drawWinner()">Auslosen</button>
+  </div>
+
+  <div id="winner"></div>
+
+  <script>
+    function extractNames(text) {
+      // Teilt nach Zeilen, entfernt Leerzeichen
+      let lines = text.split("\n").map(l => l.trim()).filter(l => l);
+
+      // Beispiel: Facebook-Kommentare haben meist "Max Mustermann: Kommentartext"
+      // Wir nehmen alles bis zum ersten ":" oder ersten " " im Satz
+      let names = lines.map(l => {
+        if (l.includes(":")) return l.split(":")[0].trim();
+        else return l.split(" ")[0].trim(); 
+      });
+
+      // Nur eindeutige Namen behalten
+      return [...new Set(names)];
+    }
+
+    function drawWinner() {
+      const textarea = document.getElementById("names");
+      const count = parseInt(document.getElementById("winnerCount").value);
+      const names = extractNames(textarea.value);
+
+      if (names.length === 0) {
+        alert("Keine gültigen Namen gefunden!");
+        return;
+      }
+
+      if (count > names.length) {
+        alert("Es gibt weniger Teilnehmer als gewünschte Gewinner!");
+        return;
+      }
+
+      // Zufällige Gewinner auswählen
+      let winners = [];
+      let pool = [...names];
+      for (let i = 0; i < count; i++) {
+        let idx = Math.floor(Math.random() * pool.length);
+        winners.push(pool[idx]);
+        pool.splice(idx, 1);
+      }
+
+      document.getElementById("winner").innerHTML = 
+        "🎉 Gewinner: <br><br>" + winners.join("<br>") + " 🎉";
+
+      confetti();
+    }
+
+    // kleines Konfetti Script
+    function confetti() {
+      for (let i = 0; i < 100; i++) {
+        const confetto = document.createElement("div");
+        confetto.style.position = "fixed";
+        confetto.style.left = Math.random() * window.innerWidth + "px";
+        confetto.style.top = "-10px";
+        confetto.style.width = "8px";
+        confetto.style.height = "8px";
+        confetto.style.backgroundColor = "hsl(" + Math.random() * 360 + ", 100%, 50%)";
+        confetto.style.opacity = "0.8";
+        confetto.style.transition = "transform 3s linear, top 3s linear";
+        document.body.appendChild(confetto);
+
+        setTimeout(() => {
+          confetto.style.top = window.innerHeight + "px";
+          confetto.style.transform = "rotate(" + (Math.random() * 720) + "deg)";
+        }, 100);
+
+        setTimeout(() => confetto.remove(), 3000);
+      }
+    }
+  </script>
+</body>
+</html>
